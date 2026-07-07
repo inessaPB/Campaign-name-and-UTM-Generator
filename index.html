@@ -1,0 +1,772 @@
+<style>
+  :root{
+    --ink:#1c2024;
+    --paper:#f7f6f3;
+    --panel:#ffffff;
+    --line:#e2dfd8;
+    --accent:#7a5c8a;
+    --accent-bg:#f1eaf4;
+    --op:#3d5a6c;
+    --op-bg:#eaf0f2;
+    --utm:#2f6b4f;
+    --utm-bg:#e9f2ec;
+    --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  .app{
+    font-family:var(--sans);
+    background:var(--paper);
+    color:var(--ink);
+    max-width:740px;
+    margin:0 auto;
+    padding:28px 24px 60px;
+  }
+  .header{margin-bottom:18px;}
+  .header h1{
+    font-size:19px;
+    font-weight:680;
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .header p{
+    font-size:13px;
+    color:#7d7669;
+    margin:0;
+    line-height:1.5;
+  }
+
+  .tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom:18px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:0;
+  }
+  .tab{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:600;
+    padding:9px 14px;
+    border:none;
+    background:transparent;
+    color:#8a8477;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    margin-bottom:-1px;
+  }
+  .tab.active{
+    color:var(--ink);
+    border-bottom-color:var(--accent);
+  }
+  .tab.active[data-mode="op"]{border-bottom-color:var(--op);}
+  .tab.active[data-mode="utm"]{border-bottom-color:var(--utm);}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:18px;
+  }
+
+  .field-label{
+    font-size:11px;
+    font-weight:650;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#8a8477;
+    margin-bottom:6px;
+    display:block;
+  }
+  .field-hint{
+    font-size:11px;
+    color:#a39d8e;
+    margin-top:4px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  .grid .span2{grid-column:1 / -1;}
+  .grid3{
+    display:grid;
+    grid-template-columns:1fr 1fr 2fr;
+    gap:14px;
+  }
+
+  select, input[type=text]{
+    width:100%;
+    font-family:var(--sans);
+    font-size:13.5px;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    background:#fff;
+    color:var(--ink);
+  }
+  select:focus, input:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  .op-mode select:focus, .op-mode input:focus{
+    border-color:var(--op);
+  }
+
+  .field{margin-bottom:0;}
+
+  .preview-box{
+    margin-top:20px;
+    padding:16px;
+    background:var(--accent-bg);
+    border:1px solid var(--accent);
+    border-radius:8px;
+  }
+  .preview-box.op{
+    background:var(--op-bg);
+    border-color:var(--op);
+  }
+  .preview-label{
+    font-size:10.5px;
+    font-weight:650;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  .preview-box.op .preview-label{color:var(--op);}
+  .preview-name{
+    font-family:var(--mono);
+    font-size:15px;
+    font-weight:600;
+    color:var(--ink);
+    word-break:break-word;
+    line-height:1.4;
+  }
+  .preview-invalid{
+    color:#a13f22;
+    font-size:12px;
+    font-family:var(--sans);
+    margin-top:6px;
+  }
+
+  .btn-row{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .btn{
+    font-family:var(--sans);
+    font-size:12.5px;
+    font-weight:600;
+    padding:9px 14px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .btn:hover{background:#efece5;}
+  .btn.primary{
+    background:var(--ink);
+    color:var(--paper);
+    border-color:var(--ink);
+  }
+  .btn.primary:hover{background:#000;}
+  .msg{
+    font-family:var(--mono);
+    font-size:11px;
+    color:#5c7a5e;
+  }
+
+  .history-card h2{
+    font-size:12px;
+    font-weight:650;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#8a8477;
+    margin:0 0 12px;
+  }
+  .history-empty{
+    font-family:var(--mono);
+    font-size:12px;
+    color:#a39d8e;
+  }
+  .history-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:9px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .history-item:last-child{border-bottom:none;}
+  .history-name{
+    font-family:var(--mono);
+    font-size:13px;
+    word-break:break-word;
+  }
+  .history-badge{
+    font-family:var(--sans);
+    font-size:9.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    padding:2px 6px;
+    border-radius:4px;
+    margin-right:8px;
+    background:var(--accent-bg);
+    color:var(--accent);
+  }
+  .history-badge.op{background:var(--op-bg);color:var(--op);}
+  .history-actions{display:flex;gap:4px;flex-shrink:0;}
+  .icon-btn{
+    width:26px;height:26px;
+    border:none;
+    background:transparent;
+    border-radius:5px;
+    cursor:pointer;
+    color:#9a9486;
+    font-size:13px;
+  }
+  .icon-btn:hover{background:#efece5;color:var(--ink);}
+
+  .ref-card details{margin-bottom:10px;}
+  .ref-card summary{
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    padding:6px 0;
+    color:var(--ink);
+  }
+  .ref-card summary:hover{color:var(--accent);}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12.5px;
+    margin-top:8px;
+  }
+  table th{
+    text-align:left;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    color:#8a8477;
+    padding:6px 8px;
+    border-bottom:1px solid var(--line);
+  }
+  table td{
+    padding:7px 8px;
+    border-bottom:1px solid #eeece6;
+    vertical-align:top;
+  }
+  table td.mono{font-family:var(--mono);font-size:12px;}
+
+  .footer-note{
+    font-size:11.5px;
+    color:#a39d8e;
+    text-align:center;
+    margin-top:24px;
+    line-height:1.6;
+  }
+
+  .utm-table-wrap{
+    overflow-x:auto;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+  }
+  table.utm-table{
+    width:100%;
+    min-width:1000px;
+    border-collapse:collapse;
+    font-size:12.5px;
+    margin-top:0;
+  }
+  table.utm-table th{
+    text-align:left;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    color:#8a8477;
+    padding:8px 8px;
+    border-bottom:1px solid var(--line);
+    background:#faf9f6;
+    position:sticky;
+    top:0;
+    white-space:nowrap;
+  }
+  table.utm-table td{
+    padding:5px 6px;
+    border-bottom:1px solid #eeece6;
+    vertical-align:middle;
+  }
+  table.utm-table input{
+    width:100%;
+    min-width:110px;
+    font-family:var(--sans);
+    font-size:12px;
+    padding:6px 7px;
+    border:1px solid transparent;
+    border-radius:5px;
+    background:transparent;
+  }
+  table.utm-table input:focus{
+    outline:none;
+    border-color:var(--utm);
+    background:#fff;
+  }
+  table.utm-table td.link-cell{
+    min-width:120px;
+    max-width:220px;
+  }
+  table.utm-table td.link-cell input{min-width:120px;}
+  table.utm-table td.output-cell{
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:#2f6b4f;
+    word-break:break-all;
+    max-width:260px;
+    min-width:220px;
+    line-height:1.5;
+  }
+  table.utm-table td.row-actions{
+    white-space:nowrap;
+    width:1%;
+  }
+  .utm-toolbar{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+
+  @media (max-width:480px){
+    .grid, .grid3{grid-template-columns:1fr;}
+    .app{padding:20px 14px 40px;}
+    .tabs{flex-wrap:wrap;}
+  }
+</style>
+
+<div class="app">
+  <div class="header">
+    <h1>Marketing Ops Naming Generator</h1>
+    <p>Build compliant names for campaigns and operational programs — pick a tab below.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-mode="campaign" onclick="switchTab('campaign')">Campaign</button>
+    <button class="tab" data-mode="utm" onclick="switchTab('utm')">UTM Builder</button>
+  </div>
+
+  <!-- ===================== CAMPAIGN PANEL ===================== -->
+  <div class="panel active" id="panel-campaign">
+    <div class="card">
+      <div class="grid">
+        <div class="field">
+          <label class="field-label">Launch month (YYYY-MM)</label>
+          <input type="text" id="fYear" value="2026-05" placeholder="2026-05">
+        </div>
+        <div class="field">
+          <label class="field-label">Region</label>
+          <select id="fRegion">
+            <option>Global</option><option>APAC</option><option>EMEA</option><option>LATAM</option><option>US</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Channel</label>
+          <select id="fChannel">
+            <option value="Ad">Ad</option>
+            <option value="CAMP">Campaign (CAMP)</option>
+            <option value="CONF">Conference (CONF)</option>
+            <option value="CS">Content Syndication (CS)</option>
+            <option value="DG">Digital Gift (DG)</option>
+            <option value="Drip">Drip</option>
+            <option value="Email">Email</option>
+            <option value="Event">PitchBook Event (Event)</option>
+            <option value="NUR">Nurture (NUR)</option>
+            <option value="PG">Physical Gift (PG)</option>
+            <option value="WEB">Website (WEB)</option>
+            <option value="WBNR">Webinar (WBNR)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Sub channel <span style="text-transform:none;font-weight:400;">— optional</span></label>
+          <input type="text" id="fSub" placeholder="e.g. LinkedIn, RollWorks">
+        </div>
+        <div class="field span2">
+          <label class="field-label">Tactic name</label>
+          <input type="text" id="fName" placeholder="e.g. NVCA Venture Monitor">
+          <div class="field-hint">Clear, descriptive title of the tactic. This is the only free-text field — everything else comes from the dropdowns above.</div>
+        </div>
+      </div>
+
+      <div class="preview-box" id="previewBox">
+        <div class="preview-label" id="previewLabel">Campaign name</div>
+        <div class="preview-name" id="preview">—</div>
+        <div class="preview-invalid" id="invalidMsg"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn primary" onclick="copyPreview('unified')">Copy name</button>
+        <button class="btn" onclick="addToHistory('unified')">Add to list ↓</button>
+        <span class="msg" id="copyMsg-unified"></span>
+      </div>
+    </div>
+
+    <div class="card ref-card" id="campaignRefCard">
+      <details open>
+        <summary>Reference: Channel abbreviations</summary>
+        <table>
+          <tr><th>Channel</th><th>Abbreviation</th></tr>
+          <tr><td>Ad</td><td class="mono">Ad</td></tr>
+          <tr><td>Campaign</td><td class="mono">CAMP</td></tr>
+          <tr><td>Conference</td><td class="mono">CONF</td></tr>
+          <tr><td>Content Syndication</td><td class="mono">CS</td></tr>
+          <tr><td>Digital Gift</td><td class="mono">DG</td></tr>
+          <tr><td>Drip</td><td class="mono">Drip</td></tr>
+          <tr><td>Email</td><td class="mono">Email</td></tr>
+          <tr><td>PitchBook Event</td><td class="mono">Event</td></tr>
+          <tr><td>Nurture</td><td class="mono">NUR</td></tr>
+          <tr><td>Physical Gift</td><td class="mono">PG</td></tr>
+          <tr><td>Website</td><td class="mono">WEB</td></tr>
+          <tr><td>Webinar</td><td class="mono">WBNR</td></tr>
+        </table>
+      </details>
+      <details>
+        <summary>Reference: Worked examples</summary>
+        <table>
+          <tr><th>Scenario</th><th>Name</th></tr>
+          <tr><td>Spring Wave grandparent campaign</td><td class="mono">2026-05: Global-CAMP-Spring Wave</td></tr>
+          <tr><td>Q1 NVCA Venture Monitor webinar</td><td class="mono">2026-04: Global-WBNR-Q1 2026 NVCA Venture Monitor</td></tr>
+          <tr><td>US Top 100 RollWorks ad</td><td class="mono">2026-05: US-Ad-RollWorks-US Top 100</td></tr>
+        </table>
+      </details>
+      <details>
+        <summary>Reminder: Marketo vs. Inflection emails</summary>
+        <table>
+          <tr><td style="border:none;padding-top:2px;">To distinguish Marketo vs. Inflection emails, use the Salesforce Campaign Type field — not the name. Naming stays the same either way.</td></tr>
+        </table>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===================== UTM BUILDER PANEL ===================== -->
+  <div class="panel" id="panel-utm">
+    <div class="card">
+      <div class="field span2" style="margin-bottom:14px;">
+        <label class="field-label">Website URL</label>
+        <input type="text" id="utmUrl" placeholder="https://pitchbook.com/news/reports/...">
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label class="field-label">UTM Source</label>
+          <input type="text" id="utmSource" placeholder="e.g. adroll">
+        </div>
+        <div class="field">
+          <label class="field-label">UTM Medium</label>
+          <input type="text" id="utmMedium" placeholder="e.g. paidmedia">
+        </div>
+        <div class="field">
+          <label class="field-label">UTM Campaign</label>
+          <input type="text" id="utmCampaign" placeholder="e.g. 2026_05_apac_ad_adroll">
+        </div>
+        <div class="field">
+          <label class="field-label">UTM Term <span style="text-transform:none;font-weight:400;">— optional</span></label>
+          <input type="text" id="utmTerm" placeholder="e.g. apac_pilot">
+        </div>
+        <div class="field span2">
+          <label class="field-label">UTM Content <span style="text-transform:none;font-weight:400;">— optional</span></label>
+          <input type="text" id="utmContent" placeholder="e.g. anz_private_capital_breakdown">
+        </div>
+      </div>
+
+      <div class="preview-box" id="previewBoxUtm">
+        <div class="preview-label">UTM Link</div>
+        <div class="preview-name" id="utmPreview" style="font-size:12.5px;">—</div>
+        <div class="preview-invalid" id="utmInvalidMsg"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn primary" onclick="copyUtmLink()">Copy link</button>
+        <button class="btn" onclick="addUtmToList()">+ Add to list</button>
+        <span class="msg" id="utmCopyMsg"></span>
+      </div>
+    </div>
+
+    <div class="card history-card">
+      <h2>UTM links built this session</h2>
+      <div class="utm-toolbar" id="utmListToolbar" style="display:none;">
+        <button class="btn" onclick="copyAllUtmLinks()">Copy all links</button>
+        <button class="btn" onclick="downloadUtmCsv()">Download CSV</button>
+        <button class="btn" onclick="clearUtmList()">Clear list</button>
+        <span class="msg" id="utmListMsg"></span>
+      </div>
+      <div id="utmListBody"><div class="history-empty">Nothing added yet — build a link above and click "+ Add to list."</div></div>
+    </div>
+
+    <div class="card ref-card">
+      <details open>
+        <summary>Reference: what each parameter is for</summary>
+        <table>
+          <tr><th>Parameter</th><th>Purpose</th></tr>
+          <tr><td class="mono">utm_source</td><td>Where the click came from (adroll, stackadapt, linkedin, google)</td></tr>
+          <tr><td class="mono">utm_medium</td><td>The category of channel (paidmedia, programmatic, social, email)</td></tr>
+          <tr><td class="mono">utm_campaign</td><td>Ties the click back to a specific initiative — match your Marketo campaign name</td></tr>
+          <tr><td class="mono">utm_term</td><td>Pilot/segment identifier or paid search keyword</td></tr>
+          <tr><td class="mono">utm_content</td><td>Differentiates links within the same ad/email (e.g. which asset or CTA)</td></tr>
+        </table>
+      </details>
+      <details>
+        <summary>Formatting notes</summary>
+        <table>
+          <tr><td style="border:none;padding-top:2px;">
+            Values are lowercased and spaces are converted to underscores automatically, matching a format like <span class="mono">2026_05_apac_ad_adroll</span>. Term and Content are optional — leave them blank and they're simply left out of the generated link.
+          </td></tr>
+        </table>
+      </details>
+    </div>
+  </div>
+
+  <div class="card history-card">
+    <h2>Names built this session</h2>
+    <div id="historyList"><div class="history-empty">Nothing added yet — build a name above and click "Add to list."</div></div>
+  </div>
+
+  <div class="footer-note">Built for Marketing Ops · matches the folder structure &amp; SFDC Campaign Hierarchy convention</div>
+</div>
+
+<script>
+function switchTab(mode){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const tabMap = {campaign:0, utm:1};
+  document.querySelectorAll('.tab')[tabMap[mode]].classList.add('active');
+  document.getElementById('panel-' + mode).classList.add('active');
+}
+
+// ---- Campaign fields ----
+function buildCampaignName(){
+  const year = document.getElementById('fYear').value.trim();
+  const region = document.getElementById('fRegion').value;
+  const channel = document.getElementById('fChannel').value;
+  const sub = document.getElementById('fSub').value.trim();
+  const name = document.getElementById('fName').value.trim();
+
+  const parts = [region, channel];
+  if(sub) parts.push(sub);
+  if(name) parts.push(name);
+
+  const label = parts.join('-');
+  const full = year ? `${year}: ${label}` : label;
+
+  let invalid = '';
+  if(!year || !/^\d{4}-\d{2}$/.test(year)) invalid = 'Launch date should be in YYYY-MM format (e.g. 2026-05).';
+  else if(!name) invalid = 'Add a tactic name to complete the campaign name.';
+
+  return { full, invalid };
+}
+
+// ---- Build/preview ----
+function buildUnifiedName(){
+  const result = buildCampaignName();
+  document.getElementById('preview').textContent = result.full;
+  document.getElementById('invalidMsg').textContent = result.invalid;
+  return result.full;
+}
+
+['fYear','fRegion','fChannel','fSub','fName'].forEach(id => {
+  document.getElementById(id).addEventListener('input', buildUnifiedName);
+  document.getElementById(id).addEventListener('change', buildUnifiedName);
+});
+
+// ---- Shared: copy / history ----
+function copyPreview(mode){
+  const text = buildUnifiedName();
+  navigator.clipboard.writeText(text).then(() => {
+    const msg = document.getElementById('copyMsg-' + mode);
+    msg.textContent = 'Copied ✓';
+    setTimeout(() => msg.textContent = '', 1800);
+  });
+}
+
+let history = [];
+function addToHistory(mode){
+  const name = buildUnifiedName();
+  if(!name || name.includes('…')) return;
+  if(document.getElementById('invalidMsg').textContent) return;
+  history.unshift({name, label: 'Campaign', isOp: false});
+  renderHistory();
+}
+function removeHistory(idx){
+  history.splice(idx, 1);
+  renderHistory();
+}
+function copyHistoryItem(idx){
+  navigator.clipboard.writeText(history[idx].name);
+}
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  if(history.length === 0){
+    el.innerHTML = '<div class="history-empty">Nothing added yet — build a name above and click "Add to list."</div>';
+    return;
+  }
+  el.innerHTML = history.map((h, i) => `
+    <div class="history-item">
+      <div>
+        <span class="history-badge${h.isOp ? ' op' : ''}">${h.label}</span>
+        <span class="history-name">${h.name.replace(/</g,'&lt;')}</span>
+      </div>
+      <div class="history-actions">
+        <button class="icon-btn" title="Copy" onclick="copyHistoryItem(${i})">⧉</button>
+        <button class="icon-btn" title="Remove" onclick="removeHistory(${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---- UTM Builder (single form + saved list) ----
+let utmList = [];
+
+function slugify(s){
+  if(!s) return '';
+  return s.toLowerCase()
+    .trim()
+    .replace(/\s+/g,'_')
+    .replace(/[^a-z0-9_\-.]/g,'');
+}
+
+function esc(s){
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildUtmLink(){
+  const url = document.getElementById('utmUrl').value.trim();
+  const source = document.getElementById('utmSource').value.trim();
+  const medium = document.getElementById('utmMedium').value.trim();
+  const campaign = document.getElementById('utmCampaign').value.trim();
+  const term = document.getElementById('utmTerm').value.trim();
+  const content = document.getElementById('utmContent').value.trim();
+
+  const invalidEl = document.getElementById('utmInvalidMsg');
+  let invalid = '';
+  if(!url) invalid = 'Add a website URL.';
+  else if(!/^https?:\/\//i.test(url)) invalid = 'URL should start with http:// or https://';
+  else if(!source) invalid = 'Add a UTM Source.';
+  else if(!medium) invalid = 'Add a UTM Medium.';
+  else if(!campaign) invalid = 'Add a UTM Campaign.';
+  invalidEl.textContent = invalid;
+
+  if(invalid){
+    document.getElementById('utmPreview').textContent = '—';
+    return { link: '', invalid, fields: {url, source, medium, campaign, term, content} };
+  }
+
+  const params = [
+    ['utm_source', slugify(source)],
+    ['utm_medium', slugify(medium)],
+    ['utm_campaign', slugify(campaign)],
+  ];
+  if(term) params.push(['utm_term', slugify(term)]);
+  if(content) params.push(['utm_content', slugify(content)]);
+
+  const sep = url.includes('?') ? '&' : '?';
+  const query = params.map(p => `${p[0]}=${encodeURIComponent(p[1])}`).join('&');
+  const link = `${url}${sep}${query}`;
+  document.getElementById('utmPreview').textContent = link;
+  return { link, invalid: '', fields: {url, source, medium, campaign, term, content} };
+}
+
+['utmUrl','utmSource','utmMedium','utmCampaign','utmTerm','utmContent'].forEach(id => {
+  document.getElementById(id).addEventListener('input', buildUtmLink);
+  document.getElementById(id).addEventListener('change', buildUtmLink);
+});
+
+function copyUtmLink(){
+  const { link, invalid } = buildUtmLink();
+  if(invalid || !link) return;
+  navigator.clipboard.writeText(link).then(() => {
+    const msg = document.getElementById('utmCopyMsg');
+    msg.textContent = 'Copied ✓';
+    setTimeout(() => msg.textContent = '', 1800);
+  });
+}
+
+function addUtmToList(){
+  const { link, invalid, fields } = buildUtmLink();
+  if(invalid || !link) return;
+  utmList.unshift(Object.assign({ link }, fields));
+  renderUtmList();
+}
+
+function removeUtmListItem(idx){
+  utmList.splice(idx, 1);
+  renderUtmList();
+}
+
+function copyUtmListItem(idx){
+  navigator.clipboard.writeText(utmList[idx].link);
+}
+
+function renderUtmList(){
+  const el = document.getElementById('utmListBody');
+  const toolbar = document.getElementById('utmListToolbar');
+  toolbar.style.display = utmList.length ? 'flex' : 'none';
+  if(utmList.length === 0){
+    el.innerHTML = '<div class="history-empty">Nothing added yet — build a link above and click "+ Add to list."</div>';
+    return;
+  }
+  el.innerHTML = utmList.map((item, i) => `
+    <div class="history-item">
+      <div class="history-name">${esc(item.link)}</div>
+      <div class="history-actions">
+        <button class="icon-btn" title="Copy" onclick="copyUtmListItem(${i})">⧉</button>
+        <button class="icon-btn" title="Remove" onclick="removeUtmListItem(${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function copyAllUtmLinks(){
+  navigator.clipboard.writeText(utmList.map(i => i.link).join('\n')).then(() => {
+    const msg = document.getElementById('utmListMsg');
+    msg.textContent = 'Copied ✓';
+    setTimeout(() => msg.textContent = '', 1800);
+  });
+}
+
+function clearUtmList(){
+  if(confirm('Clear all saved UTM links?')){
+    utmList = [];
+    renderUtmList();
+  }
+}
+
+function downloadUtmCsv(){
+  const header = ['Website Link','UTM Source','UTM Medium','UTM Campaign','UTM Term','UTM Content','UTM Link (auto-generated)'];
+  const csvEscape = v => `"${(v || '').replace(/"/g,'""')}"`;
+  const rows = utmList.map(i => [i.url, i.source, i.medium, i.campaign, i.term, i.content, i.link].map(csvEscape).join(','));
+  const csv = [header.map(csvEscape).join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'utm-links.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+buildUtmLink();
+buildUnifiedName();
+</script>
